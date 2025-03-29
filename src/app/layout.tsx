@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
-import { ActiveThemeProvider } from "@/components/active-theme";
+import { ThemeProvider } from "@/components/layout/theme-provider";
+import { ActiveThemeProvider } from "@/components/layout/active-theme";
 import { cookies } from "next/headers";
 import { cn } from "@/lib/utils";
+import { ReduxProvider } from "@/features/provider";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
 	variable: "--font-inter",
@@ -43,7 +45,9 @@ export default async function RootLayout({
 					enableColorScheme
 				>
 					<ActiveThemeProvider initialTheme={activeThemeValue}>
-						{children}
+						<Toaster>
+							<ReduxProvider>{children}</ReduxProvider>
+						</Toaster>
 					</ActiveThemeProvider>
 				</ThemeProvider>
 			</body>

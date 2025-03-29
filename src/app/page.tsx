@@ -1,17 +1,25 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { GalleryVerticalEnd } from "lucide-react";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+	const router = useRouter();
+
+	const onClickHandler = () => {
+		router.push("/login");
+	};
 	return (
 		<div className="grid min-h-svh">
 			<div className="w-full flex flex-col gap-4 p-6 md:p-10">
 				<div className="flex justify-center gap-2 md:justify-start">
 					<a
-						href="#"
+						href="http://localhost:3000"
 						className="flex items-center gap-2 font-medium"
+						target="_blank"
 					>
-						<div className="flex h-6 w-6 items-center justify-center rounded-md bg-muted text-primary-foreground">
+						<div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
 							<GalleryVerticalEnd className="size-4" />
 						</div>
 						SLYIX APPAREL
@@ -30,7 +38,8 @@ export default function Home() {
 					</p>
 					<Button
 						variant={"secondary"}
-						className="mt-2 bg-violet-500 cursor-pointer hover:bg-violet-600"
+						className="mt-2 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
+						onClick={onClickHandler}
 					>
 						Login to Dashboard
 					</Button>
