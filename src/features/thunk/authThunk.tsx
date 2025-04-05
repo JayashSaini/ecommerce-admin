@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { loginUser, logoutUser } from "@/api";
+import { loginUser, logoutUser } from "@/api/auth";
 import { LocalStorage } from "@/lib/utils";
 
 // Create async thunks for handling API calls

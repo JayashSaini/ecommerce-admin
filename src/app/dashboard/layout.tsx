@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { LocalStorage } from "@/lib/utils";
 import { setUser } from "@/features/slices/authSlice";
 import { UserInterface } from "@/types/auth";
+import { getCategories, getProducts } from "@/features/thunk/dashboardThunk";
 
 export default function Layout({
 	children,
@@ -23,6 +24,10 @@ export default function Layout({
 			if (user) {
 				dispatch(setUser({ user }));
 			}
+		}
+		if (user) {
+			dispatch(getCategories());
+			dispatch(getProducts());
 		}
 	}, [user, dispatch]);
 

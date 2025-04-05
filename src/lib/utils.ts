@@ -88,3 +88,12 @@ export class LocalStorage {
 		localStorage.clear();
 	}
 }
+
+export function formatPrismaDate(dateString: Date | string): string {
+	const date = new Date(dateString);
+	return date.toLocaleDateString("en-GB", {
+		day: "2-digit",
+		month: "long",
+		year: "numeric",
+	});
+}

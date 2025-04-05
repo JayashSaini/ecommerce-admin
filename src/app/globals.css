@@ -238,3 +238,7 @@ body {
 		@apply !rounded-none !shadow-none;
 	}
 }
+
+.PopoverContent[data-align="end"] {
+	animation-name: slideDown;
+}
