@@ -1,6 +1,6 @@
 "use client";
 
-import { useThemeConfig } from "@/components/active-theme";
+import { useThemeConfig } from "@/components/layout/active-theme";
 import { Label } from "@/components/ui/label";
 import {
 	Select,
@@ -14,45 +14,20 @@ import {
 } from "@/components/ui/select";
 
 const DEFAULT_THEMES = [
-	{
-		name: "Default",
-		value: "default",
-	},
-	{
-		name: "Blue",
-		value: "blue",
-	},
-	{
-		name: "Green",
-		value: "green",
-	},
-	{
-		name: "Amber",
-		value: "amber",
-	},
-	{
-		name: "Violet",
-		value: "violet",
-	},
+	{ name: "Crystal Dawn", value: "default" },
+	{ name: "Ocean Pulse", value: "blue" },
+	{ name: "Emerald Blaze", value: "green" },
+	{ name: "Golden Ember", value: "amber" },
+	{ name: "Velvet Eclipse", value: "violet" },
+	{ name: "Midnight Glacier", value: "midnight" },
 ];
 
 const SCALED_THEMES = [
-	{
-		name: "Default",
-		value: "default-scaled",
-	},
-	{
-		name: "Blue",
-		value: "blue-scaled",
-	},
+	{ name: "Crystal Dawn Scaled", value: "default-scaled" },
+	{ name: "Ocean Pulse Scaled", value: "blue-scaled" },
 ];
 
-const MONO_THEMES = [
-	{
-		name: "Mono",
-		value: "mono-scaled",
-	},
-];
+const MONO_THEMES = [{ name: "Noir Mode", value: "mono-scaled" }];
 
 export function ThemeSelector() {
 	const { activeTheme, setActiveTheme } = useThemeConfig();
@@ -75,7 +50,7 @@ export function ThemeSelector() {
 					className="justify-start *:data-[slot=select-value]:w-12"
 				>
 					<span className="text-muted-foreground hidden sm:block">
-						Select a theme:
+						Choose Style
 					</span>
 					<span className="text-muted-foreground block sm:hidden">Theme</span>
 					<SelectValue placeholder="Select a theme" />

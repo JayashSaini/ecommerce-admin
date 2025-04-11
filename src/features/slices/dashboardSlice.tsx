@@ -7,7 +7,7 @@ const initialState: DashboardState = {
 	categories: [],
 	paginatedProducts: {
 		limit: 10,
-		page: 1,
+		page: 0,
 		products: [],
 		totalPages: 0,
 		totalProducts: 0,
@@ -34,7 +34,14 @@ const dashboardSlice = createSlice({
 			state.categories = action.payload;
 		});
 		builder.addCase(getProducts.fulfilled, (state, action) => {
-			state.paginatedProducts = action.payload;
+			state.paginatedProducts = {
+				products: action.payload.products,
+				totalPages: action.payload.totalPages,
+				totalProducts: action.payload.totalProducts,
+				filters: [],
+				limit: action.payload.limit,
+				page: action.payload.page - 1,
+			};
 		});
 	},
 });

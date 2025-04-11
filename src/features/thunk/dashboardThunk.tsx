@@ -26,7 +26,7 @@ export const getProducts = createAsyncThunk(
 			const { page, limit } = state.dashboard.paginatedProducts;
 
 			const { data } = await getProductsAPI({
-				page,
+				page: page + 1,
 				limit,
 			});
 

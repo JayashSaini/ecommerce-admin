@@ -33,6 +33,10 @@ const getProductsAPI = ({ limit = 10, page = 1 } = {}) => {
 	return ecomClient.get(`/products?page=${page}&limit=${limit}`);
 };
 
+const getProductByIdAPI = (id: string) => {
+	return ecomClient.get(`/products/${id}`);
+};
+
 const createProductAPI = (formData: FormData) => {
 	return ecomClient.post("/products", formData, {
 		headers: {
@@ -40,5 +44,19 @@ const createProductAPI = (formData: FormData) => {
 		},
 	});
 };
+const createVariantAPI = (formData: FormData) => {
+	return ecomClient.post("/products/variants", formData, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	});
+};
 
-export { ecomClient, getCategoriesAPI, createProductAPI, getProductsAPI };
+export {
+	ecomClient,
+	getCategoriesAPI,
+	createProductAPI,
+	getProductsAPI,
+	getProductByIdAPI,
+	createVariantAPI,
+};

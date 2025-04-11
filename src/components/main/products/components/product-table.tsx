@@ -67,13 +67,22 @@ import { Badge } from "@/components/ui/badge";
 import { CSS } from "@dnd-kit/utilities";
 import { formatPrismaDate } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setProducts } from "@/features/slices/dashboardSlice";
+import {
+	setLimit,
+	setPage,
+	setProducts,
+} from "@/features/slices/dashboardSlice";
 import { ProductInterface } from "@/types/app";
+import Link from "next/link";
+import Image from "next/image";
 
 export function ProductTable() {
-	const data = useAppSelector(
-		(state) => state.dashboard.paginatedProducts.products
-	);
+	const {
+		products: data,
+		limit,
+		page,
+	} = useAppSelector((state) => state.dashboard.paginatedProducts);
+
 	const dispatch = useAppDispatch();
 
 	const [rowSelection, setRowSelection] = React.useState({});
@@ -83,10 +92,6 @@ export function ProductTable() {
 		[]
 	);
 	const [sorting, setSorting] = React.useState<SortingState>([]);
-	const [pagination, setPagination] = React.useState({
-		pageIndex: 0,
-		pageSize: 10,
-	});
 
 	const sortableId = React.useId();
 	const sensors = useSensors(
@@ -108,15 +113,27 @@ export function ProductTable() {
 			columnVisibility,
 			rowSelection,
 			columnFilters,
-			pagination,
+			pagination: {
+				pageIndex: page,
+				pageSize: limit,
+			},
 		},
+
 		getRowId: (row) => row.id.toString(),
 		enableRowSelection: true,
 		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
-		onPaginationChange: setPagination,
+		onPaginationChange: (updater) => {
+			const newState =
+				typeof updater === "function"
+					? updater({ pageIndex: page, pageSize: limit })
+					: updater;
+
+			dispatch(setPage(newState.pageIndex));
+			dispatch(setLimit(newState.pageSize));
+		},
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
@@ -314,6 +331,19 @@ const columns: ColumnDef<ProductInterface>[] = [
 		cell: ({ row }) => <DragHandle id={row.original.id} />,
 	},
 	{
+		accessorKey: "images",
+		header: "Images",
+		cell: ({ row }) => (
+			<Image
+				alt={"variants"}
+				src={row.original.images[0].url}
+				height={30}
+				width={30}
+				className="rounded-sm"
+			/>
+		),
+	},
+	{
 		accessorKey: "Name",
 		header: "Name",
 		cell: ({ row }) => {
@@ -322,7 +352,9 @@ const columns: ColumnDef<ProductInterface>[] = [
 					variant="link"
 					className="text-foreground w-fit px-0 text-left"
 				>
-					{row.original.name}
+					<Link href={`/dashboard/products/${row.original.id}`}>
+						{row.original.name}
+					</Link>
 				</Button>
 			);
 		},
@@ -380,7 +412,6 @@ const columns: ColumnDef<ProductInterface>[] = [
 			</p>
 		),
 	},
-
 	{
 		accessorKey: "createdAt",
 		header: () => <div className="w-full text-right">Release Date</div>,

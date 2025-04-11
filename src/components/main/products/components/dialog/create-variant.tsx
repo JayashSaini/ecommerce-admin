@@ -2,20 +2,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDropzone } from "react-dropzone";
 
-import { createProductSchema } from "@/lib/schemas/products/create-product";
 import { toast } from "sonner";
-import { IconCirclePlusFilled, IconPlus } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 import {
 	Dialog,
@@ -27,40 +25,33 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { useAppSelector } from "@/store/hooks";
+
 import Image from "next/image";
-import { SidebarMenuButton } from "@/components/ui/sidebar";
-import {
-	Command,
-	CommandEmpty,
-	CommandGroup,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn, requestHandler } from "@/lib/utils";
+
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Check } from "lucide-react";
+import { requestHandler } from "@/lib/utils";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { createProductAPI } from "@/api/ecommerce";
+import { createVariantAPI } from "@/api/ecommerce";
+import {
+	AvailableProductSizes,
+	createProductVariantSchema,
+} from "@/lib/schemas/products/create-variant";
 
-type ProductFormData = z.infer<typeof createProductSchema>;
+type VariantFormData = z.infer<typeof createProductVariantSchema>;
 
-export function CreateProductDialog({
-	isProductPage = true,
-}: {
-	isProductPage?: boolean;
-}) {
+export function CreateVariantDialog({ productId }: { productId: number }) {
 	const [loading, setLoading] = useState(false);
-	const { categories } = useAppSelector((state) => state.dashboard);
+
 	const [imageLimitError, setImageLimitError] = useState("");
 	const [imageSizeError, setImageSizeError] = useState("");
 	const [open, setOpen] = useState(false);
-	const [categoryOpen, setCategoryOpen] = useState(false);
-	const [selectCategory, setSelectCategory] = useState("");
+
+	const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
 	const {
 		register,
@@ -69,8 +60,8 @@ export function CreateProductDialog({
 		reset,
 		setValue,
 		watch,
-	} = useForm<ProductFormData>({
-		resolver: zodResolver(createProductSchema),
+	} = useForm<VariantFormData>({
+		resolver: zodResolver(createProductVariantSchema),
 	});
 
 	const images = watch("images");
@@ -107,7 +98,8 @@ export function CreateProductDialog({
 		maxSize: 2 * 1024 * 1024,
 	});
 
-	const onSubmit = async (data: ProductFormData) => {
+	const onSubmit = async (data: VariantFormData) => {
+		console.log("data is ----------- : ", data);
 		const formData = new FormData();
 		// Loop through all data fields
 		(Object.keys(data) as (keyof typeof data)[]).forEach((key) => {
@@ -121,50 +113,53 @@ export function CreateProductDialog({
 		});
 
 		requestHandler(
-			async () => createProductAPI(formData),
+			async () => createVariantAPI(formData),
 			setLoading,
 			({ data }) => {
-				console.log("data is ; ", data);
-				toast.success("Product created successfully.");
+				console.log("data is:", data);
+				toast.success("Variant created successfully.");
 				reset();
-				setCategoryOpen(false);
 				setOpen(false);
 			},
 			(e) => toast.error(e)
 		);
 	};
+	const toggleSize = (size: string) => {
+		setSelectedSizes((prev) =>
+			prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+		);
+	};
 
+	// For form submission
+	useEffect(() => {
+		setValue("size", JSON.stringify(selectedSizes)); // from react-hook-form
+		setValue("productId", productId);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selectedSizes]);
 	return (
 		<Dialog
 			open={open}
-			onOpenChange={setOpen}
+			onOpenChange={() => {
+				setOpen(!open);
+				reset();
+				setSelectedSizes([]);
+			}}
 		>
 			<DialogTrigger asChild>
-				{isProductPage ? (
-					<Button
-						variant="outline"
-						size="sm"
-						className="text-xs"
-					>
-						<IconPlus />
-						<span className="sm:flex hidden">New Product</span>
-					</Button>
-				) : (
-					<SidebarMenuButton
-						tooltip="Quick Create"
-						className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-					>
-						<IconCirclePlusFilled />
-						<span>Quick Create</span>
-					</SidebarMenuButton>
-				)}
+				<Button
+					variant="outline"
+					size="default"
+				>
+					<IconPlus />
+					<span className="sm:flex hidden">New Variant</span>
+				</Button>
 			</DialogTrigger>
 			<DialogOverlay className="fixed inset-0 bg-background/30 backdrop-blur-sm z-40" />
 			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
-					<DialogTitle>Create Product</DialogTitle>
+					<DialogTitle>Create Variant</DialogTitle>
 					<DialogDescription>
-						Fill in the product details and click create.
+						Fill in the variant details and click create.
 					</DialogDescription>
 				</DialogHeader>
 
@@ -172,115 +167,116 @@ export function CreateProductDialog({
 					onSubmit={handleSubmit(onSubmit)}
 					className="space-y-4"
 				>
-					{/* Name */}
-					<div className="space-y-2">
-						<Label htmlFor="name">Name</Label>
+					<div className="space-y-2 w-full">
+						<Label htmlFor="name">Title</Label>
 						<Input
-							id="name"
-							placeholder="Enter product name"
-							{...register("name")}
+							id="title"
+							placeholder="Enter variant title"
+							{...register("title")}
 						/>
-						{errors.name && (
-							<p className="text-sm text-red-500">{errors.name.message}</p>
+						{errors.title && (
+							<p className="text-sm text-red-500">{errors.title.message}</p>
 						)}
 					</div>
+					<div className="w-full flex gap-2 sm:flex-row flex-col">
+						<div className="space-y-2 w-full">
+							<Label htmlFor="name">Color</Label>
+							<Input
+								id="color"
+								placeholder="Enter variant color"
+								{...register("color")}
+							/>
+							{errors.color && (
+								<p className="text-sm text-red-500">{errors.color.message}</p>
+							)}
+						</div>
 
-					{/* Description */}
+						<div className="space-y-2 w-full">
+							<Label htmlFor="name">Material</Label>
+							<Input
+								id="material"
+								placeholder="Enter variant material"
+								{...register("material")}
+							/>
+							{errors.material && (
+								<p className="text-sm text-red-500">
+									{errors.material.message}
+								</p>
+							)}
+						</div>
+					</div>
+
+					{/* Base Price */}
 					<div className="space-y-2">
-						<Label htmlFor="description">Description</Label>
-						<Textarea
-							id="description"
-							placeholder="Enter product description"
-							{...register("description")}
+						<Label htmlFor="additionalPrice">Additional Price</Label>
+						<Input
+							id="additionalPrice"
+							type="number"
+							step="1.00"
+							placeholder="Enter variant additional price"
+							{...register("additionalPrice")}
 						/>
-						{errors.description && (
+						{errors.additionalPrice && (
 							<p className="text-sm text-red-500">
-								{errors.description.message}
+								{errors.additionalPrice.message}
 							</p>
 						)}
 					</div>
 
 					{/* Base Price */}
 					<div className="space-y-2">
-						<Label htmlFor="basePrice">Base Price</Label>
+						<Label htmlFor="stockQty">Stock Quantity</Label>
 						<Input
-							id="basePrice"
+							id="stockQty"
 							type="number"
 							step="1.00"
-							placeholder="Enter base price"
-							{...register("basePrice")}
+							placeholder="Enter variant stock quantity"
+							{...register("stockQty")}
 						/>
-						{errors.basePrice && (
-							<p className="text-sm text-red-500">{errors.basePrice.message}</p>
+						{errors.stockQty && (
+							<p className="text-sm text-red-500">{errors.stockQty.message}</p>
 						)}
 					</div>
 
-					{/* Category */}
 					<div className="space-y-2">
-						<Label htmlFor="categoryId">Category</Label>
-
-						<Popover
-							open={categoryOpen}
-							onOpenChange={setCategoryOpen}
-						>
+						<Label>Sizes</Label>
+						<Popover>
 							<PopoverTrigger asChild>
 								<Button
 									variant="outline"
 									role="combobox"
-									aria-expanded={categoryOpen}
-									className="w-[250px] justify-between"
+									className="w-full justify-between"
 								>
-									{selectCategory
-										? selectCategory
-										: categories.find((c) => c.name === selectCategory)?.name ||
-										  "Select category..."}
-									<ChevronsUpDown className="opacity-50 ml-2 h-4 w-4 shrink-0" />
+									{selectedSizes.length > 0
+										? selectedSizes.join(", ")
+										: "Select Sizes"}
+									<Check className="ml-2 h-4 w-4 opacity-50" />
 								</Button>
 							</PopoverTrigger>
-
-							<PopoverContent className=" p-0">
-								<Command className="border rounded-md">
-									<CommandInput
-										placeholder="Search category..."
-										className="h-9"
-									/>
-									<CommandList>
-										<CommandEmpty>No category found.</CommandEmpty>
-										<CommandGroup>
-											{categories.map((category) => (
-												<CommandItem
-													key={category.id}
-													value={category.name}
-													onSelect={() => {
-														setValue("categoryId", category.id, {
-															shouldValidate: true,
-														});
-														setSelectCategory(category.name);
-														setCategoryOpen(false);
-													}}
-												>
-													{category.name}
-													<Check
-														className={cn(
-															"ml-auto",
-															category.name === selectCategory
-																? "opacity-100"
-																: "opacity-0"
-														)}
-													/>
-												</CommandItem>
-											))}
-										</CommandGroup>
-									</CommandList>
+							<PopoverContent
+								className="w-[200px] p-0"
+								align="start"
+							>
+								<Command>
+									<CommandGroup>
+										{AvailableProductSizes.map((size) => (
+											<CommandItem
+												key={size}
+												onSelect={() => toggleSize(size)}
+												className="flex items-center justify-between"
+											>
+												<span>{size}</span>
+												{selectedSizes.includes(size) && (
+													<Check className="h-4 w-4 text-primary" />
+												)}
+											</CommandItem>
+										))}
+									</CommandGroup>
 								</Command>
 							</PopoverContent>
 						</Popover>
-
-						{/* Error display */}
-						{errors.categoryId && (
-							<p className="text-sm text-red-500">
-								{errors.categoryId.message}
-							</p>
+						{errors.size && (
+							<p className="text-sm text-red-500">{errors.size.message}</p>
 						)}
 					</div>
 
@@ -344,7 +340,7 @@ export function CreateProductDialog({
 							disabled={loading}
 							isLoading={loading}
 						>
-							Create Product
+							Create Variant
 						</Button>
 					</DialogFooter>
 				</form>

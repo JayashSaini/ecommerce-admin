@@ -1,4 +1,3 @@
-// next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -13,6 +12,14 @@ const nextConfig: NextConfig = {
 				destination: "http://localhost:5000/api/:path*", // Ecommerce server
 			},
 		];
+	},
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "d3ef7beuhkdr29.cloudfront.net",
+			},
+		],
 	},
 };
 

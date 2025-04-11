@@ -174,11 +174,11 @@ body {
 
 .theme-green,
 .theme-green-scaled {
-	--primary: var(--color-lime-600);
+	--primary: #2b6a4d;
 	--primary-foreground: var(--color-lime-50);
 
 	@variant dark {
-		--primary: var(--color-lime-600);
+		--primary: #568d66;
 		--primary-foreground: var(--color-lime-50);
 	}
 }
@@ -202,6 +202,16 @@ body {
 	@variant dark {
 		--primary: var(--color-violet-500);
 		--primary-foreground: var(--color-violet-50);
+	}
+}
+.theme-midnight,
+.theme-midnight-scaled {
+	--primary: #003049;
+	--primary-foreground: #e8f3f8;
+
+	@variant dark {
+		--primary: #1c3c53;
+		--primary-foreground: #e8f3f8;
 	}
 }
 

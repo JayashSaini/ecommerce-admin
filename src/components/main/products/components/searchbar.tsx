@@ -1,7 +1,14 @@
 import { Input } from "@/components/ui/input";
 import { IconSearch } from "@tabler/icons-react";
+import clsx from "clsx"; // or use classnames if you prefer
 
-export function SearchBar() {
+interface SearchBarProps {
+	value: string;
+	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	className?: string; // optional prop to override/extend classes
+}
+
+export function SearchBar({ value, onChange, className }: SearchBarProps) {
 	return (
 		<div className="relative">
 			<IconSearch
@@ -11,8 +18,13 @@ export function SearchBar() {
 			<Input
 				type="text"
 				placeholder="Search"
-				className="pl-8 pr-2 py-1 border rounded-md bg-transparent dark:bg-transparent focus:outline-none focus:ring-0 dark:focus:ring-0"
+				className={clsx(
+					"pl-8 pr-2 py-1 border rounded-md bg-transparent dark:bg-transparent focus:outline-none focus:ring-0 dark:focus:ring-0",
+					className
+				)}
 				style={{ maxWidth: "150px" }}
+				value={value}
+				onChange={onChange}
 			/>
 		</div>
 	);

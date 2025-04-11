@@ -1,10 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IconDownload } from "@tabler/icons-react";
 import { Products } from "./products";
 import { Categories } from "./categories";
-
 import { CreateProductDialog } from "./components/dialog/create-product";
+import ExportProductsButton from "./components/export-product-button";
 
 export function Layout() {
 	return (
@@ -31,15 +29,7 @@ export function Layout() {
 								</TabsTrigger>
 							</div>
 							<div className="flex gap-2 text-foreground ">
-								<Button
-									variant="outline"
-									size="sm"
-									className="text-xs"
-								>
-									<IconDownload />
-									<span className="sm:flex hidden">Export Products</span>
-								</Button>
-
+								<ExportProductsButton />
 								<CreateProductDialog />
 							</div>
 						</div>

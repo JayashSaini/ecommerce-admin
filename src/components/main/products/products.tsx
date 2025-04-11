@@ -21,7 +21,10 @@ export function Products() {
 			<div className="w-full flex justify-between px-2 items-center mb-2">
 				<Filters />
 				<div className="flex gap-2">
-					<SearchBar />
+					<SearchBar
+						onChange={() => {}}
+						value=""
+					/>
 					<Button
 						variant="outline"
 						size="icon"

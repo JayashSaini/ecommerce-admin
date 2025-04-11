@@ -33,6 +33,23 @@ export interface ProductInterface {
 	status: "PUBLISHED" | "UNPUBLISHED" | "ARCHIVED"; // can be expanded based on enum
 	images: ProductImage[];
 	category?: CategoryInterface;
+	size?: string[];
+	color?: string;
+	material?: string;
+	stockQty?: string;
+	variants?: VariantInterface;
+}
+
+export interface VariantInterface {
+	id: number;
+	productId: number;
+	title: string;
+	images: ProductImage[];
+	additionalPrice: string;
+	size: string[];
+	color: string;
+	material: string;
+	stockQty: string;
 }
 
 export interface ProductImage {
