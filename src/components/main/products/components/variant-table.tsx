@@ -289,7 +289,7 @@ const columns: ColumnDef<VariantInterface>[] = [
 				variant="link"
 				className="text-foreground w-fit px-0 text-left"
 			>
-				<Link href={`/dashboard/products/variant/${row.original.id}`}>
+				<Link href={`/dashboard/products/variants/${row.original.id}`}>
 					{row.original.title}
 				</Link>
 			</Button>

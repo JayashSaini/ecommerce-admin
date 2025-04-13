@@ -50,6 +50,7 @@ export interface VariantInterface {
 	color: string;
 	material: string;
 	stockQty: string;
+	product?: ProductInterface;
 }
 
 export interface ProductImage {

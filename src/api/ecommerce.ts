@@ -37,6 +37,10 @@ const getProductByIdAPI = (id: string) => {
 	return ecomClient.get(`/products/${id}`);
 };
 
+const getVariantByIdAPI = (id: string) => {
+	return ecomClient.get(`/products/variants/${id}`);
+};
+
 const createProductAPI = (formData: FormData) => {
 	return ecomClient.post("/products", formData, {
 		headers: {
@@ -59,4 +63,5 @@ export {
 	getProductsAPI,
 	getProductByIdAPI,
 	createVariantAPI,
+	getVariantByIdAPI,
 };
