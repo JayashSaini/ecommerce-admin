@@ -1,23 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, X, ArrowRight } from "lucide-react";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-	DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+import { Bell, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "@/components/ui/tooltip";
+	Drawer,
+	DrawerContent,
+	DrawerHeader,
+	DrawerOverlay,
+	DrawerTitle,
+} from "@/components/ui/drawer"; // <- make sure you have this
 import { NotificationInterface } from "@/types/app";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function Notifications() {
+	const [drawerOpen, setDrawerOpen] = useState(false);
+
 	const [allNotifications, setAllNotifications] = useState([
 		{ message: "🛒 New order received! Check it out.", unread: true },
 		{ message: "📦 Your package has been shipped!", unread: true },
@@ -34,18 +33,15 @@ export function Notifications() {
 	const [notifications, setNotifications] = useState<NotificationInterface[]>(
 		[]
 	);
-	const [dropdownOpen, setDropdownOpen] = useState(false);
 
 	// Get unread notifications count
 	const unreadCount = allNotifications.filter((n) => n.unread).length;
 	const notificationCount = unreadCount > 9 ? "9+" : unreadCount;
 
-	// Function to remove a notification
 	const removeNotification = (index: number) => {
 		setNotifications((prev) => {
-			const newNotifications = prev.filter((_, i) => i !== index); // Remove clicked notification
+			const newNotifications = prev.filter((_, i) => i !== index);
 
-			// Auto-load next notification from the list if available
 			const remaining = allNotifications.filter(
 				(n) => !newNotifications.includes(n)
 			);
@@ -53,98 +49,113 @@ export function Notifications() {
 				newNotifications.push(remaining[0]);
 			}
 
-			// Close dropdown if no notifications left
 			if (newNotifications.length === 0) {
-				setDropdownOpen(false);
+				setDrawerOpen(false);
 			}
 
 			return newNotifications;
 		});
 	};
 
-	// Load initial notifications
 	useEffect(() => {
 		const sortedNotifications = [...allNotifications].sort((a, b) =>
 			a.unread === b.unread ? 0 : a.unread ? -1 : 1
 		);
-		setNotifications(sortedNotifications.slice(0, 5)); // Load first 5 notifications
+		setNotifications(sortedNotifications.slice(0, 5));
 		setAllNotifications(sortedNotifications);
 	}, []);
 
 	return (
-		<DropdownMenu
-			open={dropdownOpen}
-			onOpenChange={setDropdownOpen}
-		>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant="outline"
-					size="icon"
-					className="relative"
-					onClick={() => setDropdownOpen(true)}
-				>
-					<Bell className="h-5 w-5" />
-					{/* Notification Badge */}
-					{unreadCount > 0 && dropdownOpen === false && (
-						<span className="absolute top-0 right-0 -mt-1 -mr-1 h-5 w-5 flex items-center justify-center text-xs font-semibold text-white bg-red-500 rounded-full">
-							{notificationCount}
-						</span>
-					)}
-					<span className="sr-only">View notifications</span>
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				align="end"
-				className="sm:w-96 w-72 mt-2 shadow-lg p-2"
+		<>
+			<Button
+				variant="outline"
+				size="icon"
+				className="relative"
+				onClick={() => setDrawerOpen(true)}
 			>
-				{/* Header */}
-				<div className="flex items-center justify-between px-2 py-1 text-card-foreground">
-					<span className="text-sm font-semibold ">Notifications</span>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
-							>
-								<ArrowRight className="w-4 h-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>See all</TooltipContent>
-					</Tooltip>
-				</div>
-				<DropdownMenuSeparator />
-
-				{/* Notification List */}
-				{notifications.length > 0 ? (
-					notifications.map((note, index) => (
-						<DropdownMenuItem
-							key={index}
-							className="flex items-center gap-2 py-2 justify-between"
-						>
-							<div className="flex items-center gap-2 truncate flex-1">
-								<span
-									className={`h-2 w-2 rounded-full ${
-										note.unread ? "bg-green-500" : "bg-transparent"
-									}`}
-								/>
-								<span className="truncate flex-1">{note.message}</span>
-							</div>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="text-gray-500 hover:text-red-500"
-								onClick={() => removeNotification(index)}
-							>
-								<X className="w-4 h-4" />
-							</Button>
-						</DropdownMenuItem>
-					))
-				) : (
-					<p className="text-center py-2 text-sm text-gray-500">
-						No notifications
-					</p>
+				<Bell className="h-5 w-5" />
+				{unreadCount > 0 && (
+					<span className="absolute top-0 right-0 -mt-1 -mr-1 h-5 w-5 flex items-center justify-center text-xs font-semibold text-white bg-red-500 rounded-full">
+						{notificationCount}
+					</span>
 				)}
-			</DropdownMenuContent>
-		</DropdownMenu>
+				<span className="sr-only">View notifications</span>
+			</Button>
+
+			<Drawer
+				open={drawerOpen}
+				onOpenChange={setDrawerOpen}
+				direction="right"
+			>
+				<DrawerOverlay className="fixed inset-0 bg-background/30  z-40" />
+				<DrawerContent className="w-full h-full max-w-md ml-auto mr-0 border-l">
+					<DrawerHeader className="w-full   flex flex-row justify-between items-center  px-4 pt-4">
+						<DrawerTitle className="text-lg">Notifications</DrawerTitle>
+
+						{/* Tooltip and Delete All Button */}
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="text-gray-500 hover:text-red-500"
+									onClick={() =>
+										console.log("delete notification clicked!!!!!!")
+									} // Your delete all logic
+								>
+									<Trash2 className="w-5 h-5" />
+									<span className="sr-only">Delete All Notifications</span>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Delete All Notifications</TooltipContent>
+						</Tooltip>
+					</DrawerHeader>
+
+					<div className="px-4 py-2 space-y-2 overflow-y-auto max-h-[90vh]">
+						{notifications.length > 0 ? (
+							notifications.map((note, index) => (
+								<div
+									key={index}
+									className="bg-card text-card-foreground rounded-xl p-4 flex items-center justify-between shadow-sm hover:bg-muted transition-all duration-200 "
+								>
+									{/* Left side: unread dot + icon + message */}
+									<div className="flex items-start gap-3 flex-1">
+										{/* Unread dot */}
+										<span
+											className={`mt-1 h-2 w-2 rounded-full shrink-0 ${
+												note.unread ? "bg-green-500" : "bg-transparent"
+											}`}
+										/>
+
+										{/* Icon + Message */}
+										<div className="flex flex-col space-y-0.5">
+											{/* You can optionally parse emojis and use icons here */}
+											<p className="text-sm font-medium text-muted-foreground truncate">
+												{note.message}
+											</p>
+										</div>
+									</div>
+
+									{/* Close button */}
+									<Button
+										variant="ghost"
+										size="icon"
+										className="text-gray-400 hover:text-red-500"
+										onClick={() => removeNotification(index)}
+									>
+										<X className="w-4 h-4" />
+										<span className="sr-only">Dismiss notification</span>
+									</Button>
+								</div>
+							))
+						) : (
+							<p className="text-center text-sm text-gray-500">
+								No notifications
+							</p>
+						)}
+					</div>
+				</DrawerContent>
+			</Drawer>
+		</>
 	);
 }
