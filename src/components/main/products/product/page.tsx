@@ -19,7 +19,9 @@ import {
 	IconArchive,
 	IconCircleCheckFilled,
 	IconDots,
+	IconEdit,
 	IconLoader,
+	IconTrash,
 } from "@tabler/icons-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -30,11 +32,19 @@ import { ProductCharts } from "../components/product-chart";
 import { VariantTable } from "../components/variant-table";
 import FullscreenImage from "../../../common/fullscreen-image";
 import { CustomBreadcrumb } from "@/components/common/breadcrum";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { EditProductDialog } from "../components/dialog/edit/edit-project";
 
 export function Page() {
 	const { id } = useParams();
 	const router = useRouter();
 	const [product, setProduct] = useState<null | ProductInterface>(null);
+	const [openEditDialog, setOpenEditDialog] = useState(false);
 
 	const fetchProduct = async () => {
 		await requestHandler(
@@ -51,6 +61,7 @@ export function Page() {
 	};
 	useEffect(() => {
 		fetchProduct();
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]);
 
@@ -93,7 +104,25 @@ export function Page() {
 									)}
 									{product?.status}
 								</Badge>
-								<IconDots className="w-5 text-secondary-foreground cursor-pointer" />
+
+								<DropdownMenu>
+									<DropdownMenuTrigger>
+										<IconDots className="w-5 text-secondary-foreground cursor-pointer" />
+									</DropdownMenuTrigger>
+									<DropdownMenuContent>
+										<DropdownMenuItem
+											className="cursor-pointer"
+											onClick={() => setOpenEditDialog(true)}
+										>
+											<IconEdit className="w-4 h-4 mr-2 text-muted-foreground" />
+											Edit
+										</DropdownMenuItem>
+										<DropdownMenuItem className="cursor-pointer">
+											<IconTrash className="w-4 h-4 mr-2 text-muted-foreground" />
+											Delete
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 						</CardAction>
 					</CardHeader>
@@ -213,6 +242,12 @@ export function Page() {
 					productId={product.id}
 				/>
 			</div>
+
+			{/* Rendering dialogs boxes */}
+			<EditProductDialog
+				open={openEditDialog}
+				setOpen={setOpenEditDialog}
+			/>
 		</>
 	);
 }

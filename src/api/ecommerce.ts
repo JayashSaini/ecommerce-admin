@@ -48,6 +48,10 @@ const createProductAPI = (formData: FormData) => {
 		},
 	});
 };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const updateProductAPI = (data: any) => {
+	return ecomClient.patch("/products", data);
+};
 const createVariantAPI = (formData: FormData) => {
 	return ecomClient.post("/products/variants", formData, {
 		headers: {
@@ -64,4 +68,5 @@ export {
 	getProductByIdAPI,
 	createVariantAPI,
 	getVariantByIdAPI,
+	updateProductAPI,
 };

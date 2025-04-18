@@ -41,3 +41,37 @@ export const createProductSchema = z.object({
 		.nonempty("At least one image is required")
 		.max(4, "Maximum of 4 images allowed"),
 });
+
+export const editProductSchema = z.object({
+	name: z
+		.string()
+		.trim()
+		.min(3, "Product name must be at least 3 characters long.")
+		.max(100, "Product name cannot exceed 100 characters.")
+		.nullable(), // This makes the field nullable, i.e., it can be null or a valid string.
+
+	description: z
+		.string()
+		.trim()
+		.min(3, "Description must be at least 3 characters long.")
+		.max(500, "Description cannot exceed 500 characters.")
+		.nullable(), // Nullable description
+
+	basePrice: z.coerce
+		.number()
+		.nonnegative("Base price cannot be negative")
+		.min(99, "Base price must be minimum 99")
+		.max(999999, "Base price cannot exceed 999,999.")
+		.nullable(), // Nullable basePrice
+
+	categoryId: z.coerce.number().nullable(), // Nullable categoryId
+
+	images: z
+		.array(
+			z.instanceof(File).refine((file) => file.size <= 2 * 1024 * 1024, {
+				message: "Each image must be 2MB or less",
+			})
+		)
+		.max(4, "Maximum of 4 images allowed")
+		.nullable(), // Nullable images array
+});
