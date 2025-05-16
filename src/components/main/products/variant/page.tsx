@@ -1,6 +1,6 @@
 "use client";
 
-import { getVariantByIdAPI } from "@/api/ecommerce";
+import { deleteVariantImageAPI, getVariantByIdAPI } from "@/api/ecommerce";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,25 +19,40 @@ import {
 	IconArchive,
 	IconCircleCheckFilled,
 	IconDots,
+	IconEdit,
 	IconLoader,
+	IconTrash,
 } from "@tabler/icons-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { VariantLayoutSkeleton } from "../components/skeleton/variant.skeleton";
 
-import FullscreenImage from "../../../common/fullscreen-image";
 import { CustomBreadcrumb } from "@/components/common/breadcrum";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { EditVariantDialog } from "../components/dialog/edit/edit-variant";
+import { DeleteVariantDialog } from "../components/dialog/delete-variant";
+import ScrollContainer from "react-indiana-drag-scroll";
+import { VariantMedia } from "../components/varitant-media";
+import { ParamValue } from "next/dist/server/request/params";
 
 export function Variant() {
 	const { id } = useParams();
 	const router = useRouter();
 	const [variant, setVariant] = useState<null | VariantInterface>(null);
+	const [openEditDialog, setOpenEditDialog] = useState(false);
+	const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+	const [variantLoading, setVariantLoading] = useState(false);
 
-	const fetchProduct = async () => {
+	const fetchVariant = async () => {
 		await requestHandler(
 			() => getVariantByIdAPI(id?.toString() || ""),
-			null,
+			setVariantLoading,
 			({ data }) => {
 				setVariant(data);
 			},
@@ -48,11 +63,28 @@ export function Variant() {
 		);
 	};
 	useEffect(() => {
-		fetchProduct();
+		fetchVariant();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]);
 
-	return !variant ? (
+	const deleteVariantImage = async (
+		variantId: ParamValue,
+		imageKey: string
+	) => {
+		await requestHandler(
+			() => deleteVariantImageAPI(variantId, imageKey),
+			null,
+			async () => {
+				await fetchVariant();
+				toast.success("Variant image deleted successfully.");
+			},
+			(e) => {
+				toast.error(e);
+			}
+		);
+	};
+
+	return !variant || variantLoading ? (
 		<VariantLayoutSkeleton />
 	) : (
 		<>
@@ -96,7 +128,27 @@ export function Variant() {
 									)}
 									{variant?.product?.status}
 								</Badge>
-								<IconDots className="w-5 text-secondary-foreground cursor-pointer" />
+								<DropdownMenu>
+									<DropdownMenuTrigger>
+										<IconDots className="w-5 text-secondary-foreground cursor-pointer" />
+									</DropdownMenuTrigger>
+									<DropdownMenuContent>
+										<DropdownMenuItem
+											className="cursor-pointer"
+											onClick={() => setOpenEditDialog(true)}
+										>
+											<IconEdit className="w-4 h-4 mr-2 text-muted-foreground" />
+											Edit
+										</DropdownMenuItem>
+										<DropdownMenuItem
+											className="cursor-pointer"
+											onClick={() => setOpenDeleteDialog(true)}
+										>
+											<IconTrash className="w-4 h-4 mr-2 text-muted-foreground" />
+											Delete
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</div>
 						</CardAction>
 					</CardHeader>
@@ -140,52 +192,42 @@ export function Variant() {
 					</CardContent>
 				</Card>
 				{/* Child 2 – 40% */}
-				<Card className="@container/card  col-span-5 md:col-span-2">
-					<CardHeader>
-						<CardTitle className="sm:text-md text-base">Media</CardTitle>
-						<CardAction>
-							<IconDots className="w-5 text-secondary-foreground cursor-pointer" />
-						</CardAction>
-					</CardHeader>
-					<Separator />
-					<CardContent className="w-full  flex overflow-auto gap-4 py-2">
-						{variant?.images.map((image) => (
-							<FullscreenImage
-								alt="variant images"
-								src={image.url}
-								key={image.key}
-								width={110}
-								height={110}
-								className="rounded-xl"
-							/>
-						))}
-					</CardContent>
-				</Card>
+				<VariantMedia
+					variantId={variant.id}
+					images={variant.images}
+					deleteImages={(productId, imageKey) => {
+						deleteVariantImage(productId, imageKey);
+					}}
+					fetchVariant={fetchVariant}
+				/>
+
 				{/* Child 3 – 40% */}
 				<Card className=" h-fit @container/card  col-span-5 md:col-span-2">
 					<CardHeader>
 						<CardTitle className="sm:text-md text-base">Attributes</CardTitle>
-						<CardAction>
-							<IconDots className="w-5 text-secondary-foreground cursor-pointer" />
-						</CardAction>
 					</CardHeader>
 					<Separator />
 					<CardContent className="w-full   gap-4 grid grid-cols-5">
 						<h3 className="text-card-foreground text-sm col-span-2 ">Size</h3>
-						<CardDescription className="col-span-3">
-							{variant?.size && variant?.size?.length > 0 ? (
-								<div className="flex gap-2">
-									{variant?.size.map((size, i) => (
-										<Button
-											variant="outline"
-											size="sm"
-											className="text-xs px"
-											key={i}
-										>
-											{size}
-										</Button>
-									))}
-								</div>
+						<CardDescription className="col-span-3 overflow-hidden">
+							{variant?.size && variant?.size.length > 0 ? (
+								<ScrollContainer
+									className="max-w-full overflow-x-auto flex gap-2 cursor-grab active:cursor-grabbing pb-1"
+									vertical={false}
+								>
+									<div className="flex gap-2 w-max">
+										{variant.size.map((size, i) => (
+											<Button
+												variant="outline"
+												size="sm"
+												className="text-xs select-none"
+												key={i}
+											>
+												{size}
+											</Button>
+										))}
+									</div>
+								</ScrollContainer>
 							) : (
 								"-"
 							)}
@@ -218,6 +260,18 @@ export function Variant() {
 					</CardFooter>
 				</Card>
 			</div>
+			{/* Rendering dialogs boxes */}
+			<EditVariantDialog
+				open={openEditDialog}
+				setOpen={setOpenEditDialog}
+				variant={variant}
+				fetchVariant={fetchVariant}
+			/>
+			<DeleteVariantDialog
+				open={openDeleteDialog}
+				setOpen={setOpenDeleteDialog}
+				id={variant.id.toString()}
+			/>
 		</>
 	);
 }

@@ -26,8 +26,6 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 
-import Image from "next/image";
-
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
 import { Check } from "lucide-react";
 import { requestHandler } from "@/lib/utils";
@@ -41,6 +39,7 @@ import {
 	AvailableProductSizes,
 	createProductVariantSchema,
 } from "@/lib/schemas/products/create-variant";
+import Image from "next/image";
 
 type VariantFormData = z.infer<typeof createProductVariantSchema>;
 
@@ -99,7 +98,6 @@ export function CreateVariantDialog({ productId }: { productId: number }) {
 	});
 
 	const onSubmit = async (data: VariantFormData) => {
-		console.log("data is ----------- : ", data);
 		const formData = new FormData();
 		// Loop through all data fields
 		(Object.keys(data) as (keyof typeof data)[]).forEach((key) => {

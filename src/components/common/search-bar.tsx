@@ -32,7 +32,7 @@ export function SearchBar() {
 
 	useEffect(() => {
 		const down = (e: KeyboardEvent) => {
-			if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+			if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
 				e.preventDefault();
 				setOpen((prev) => !prev);
 			}
@@ -60,13 +60,13 @@ export function SearchBar() {
 					className="pl-8 pr-16 py-2 h-9  dark:bg-background cursor-pointer placeholder:text-sm border-border/70 rounded-sm"
 				/>
 
-				{/* Shortcut Hint (⌘J) */}
+				{/* Shortcut Hint (⌘k) */}
 				<div className="absolute right-2 top-1/2 -translate-y-1/2">
 					<kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-card px-1.5 font-mono text-[10px] font-medium text-muted-foreground ">
 						<span className="text-xs">
 							{navigator.platform.includes("Mac") ? "⌘" : "Ctrl"}
 						</span>
-						J
+						K
 					</kbd>
 				</div>
 			</div>

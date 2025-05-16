@@ -23,7 +23,6 @@ import {
 	Tooltip,
 	TooltipContent,
 } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 
 const chartData = [
 	{ month: "January", sold: 186 },
@@ -49,14 +48,9 @@ export function ProductCharts() {
 				<CardAction>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
-							>
-								<ExternalLink className="w-5 h-5" />
-							</Button>
+							<ExternalLink className="w-[18px] cursor-pointer  text-secondary-foreground hover:text-secondary-foreground" />
 						</TooltipTrigger>
-						<TooltipContent>Detailed product insights</TooltipContent>
+						<TooltipContent>Product insights</TooltipContent>
 					</Tooltip>
 				</CardAction>
 			</CardHeader>

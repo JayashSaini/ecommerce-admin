@@ -49,7 +49,6 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 
 import { VariantInterface } from "@/types/app";
-import Image from "next/image";
 import {
 	IconGripVertical,
 	IconReload,
@@ -59,6 +58,7 @@ import Link from "next/link";
 import { CreateVariantDialog } from "./dialog/create-variant";
 import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchBar } from "./searchbar";
+import { CDNImage } from "@/components/common/cdn-image";
 
 export function VariantTable({
 	initialData,
@@ -259,9 +259,9 @@ const columns: ColumnDef<VariantInterface>[] = [
 		accessorKey: "images",
 		header: "Images",
 		cell: ({ row }) => (
-			<Image
+			<CDNImage
 				alt={"variants"}
-				src={row.original.images[0].url}
+				src={row.original.images[0].key}
 				height={30}
 				width={30}
 				className="rounded-sm"

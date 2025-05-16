@@ -21,7 +21,6 @@ import {
 	DialogHeader,
 	DialogOverlay,
 	DialogTitle,
-	DialogTrigger,
 } from "@/components/ui/dialog";
 
 import { cn, requestHandler } from "@/lib/utils";
@@ -44,6 +43,7 @@ import {
 } from "@/components/ui/popover";
 import { useAppSelector } from "@/store/hooks";
 import { Textarea } from "@/components/ui/textarea";
+import { useParams } from "next/navigation";
 
 type ProductFormData = z.infer<typeof editProductSchema>;
 
@@ -58,6 +58,7 @@ export function EditProductDialog({
 
 	const [categoryOpen, setCategoryOpen] = useState(false);
 	const [selectCategory, setSelectCategory] = useState("");
+	const { id } = useParams();
 
 	const { categories } = useAppSelector((state) => state.dashboard);
 
@@ -69,15 +70,19 @@ export function EditProductDialog({
 		setValue,
 	} = useForm<ProductFormData>({
 		resolver: zodResolver(editProductSchema),
+		defaultValues: {
+			basePrice: undefined,
+		},
 	});
 
 	const onSubmit = async (data: ProductFormData) => {
 		requestHandler(
-			async () => updateProductAPI(data),
+			async () => updateProductAPI(id as string, data),
 			setLoading,
 			({ data }) => {
 				reset();
 				setOpen(false);
+				window.location.reload();
 			},
 			(e) => toast.error(e)
 		);
@@ -94,7 +99,7 @@ export function EditProductDialog({
 			<DialogOverlay className="fixed inset-0 bg-background/30 backdrop-blur-sm z-40" />
 			<DialogContent className="sm:max-w-[600px]">
 				<DialogHeader>
-					<DialogTitle>Edit Variant</DialogTitle>
+					<DialogTitle>Edit Product</DialogTitle>
 					<DialogDescription>
 						Fill in the product details and click submit.
 					</DialogDescription>
@@ -140,7 +145,10 @@ export function EditProductDialog({
 							type="number"
 							step="1.00"
 							placeholder="Enter base price"
-							{...register("basePrice")}
+							required={false}
+							{...register("basePrice", {
+								setValueAs: (val) => (val === "" ? undefined : val),
+							})}
 						/>
 						{errors.basePrice && (
 							<p className="text-sm text-red-500">{errors.basePrice.message}</p>

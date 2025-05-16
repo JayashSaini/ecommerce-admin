@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	reactStrictMode: false,
-
+	/* config options here */
 	async rewrites() {
 		return [
 			{
@@ -19,7 +18,7 @@ const nextConfig: NextConfig = {
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "d3ef7beuhkdr29.cloudfront.net",
+				hostname: "dfyctv6gr10sf.cloudfront.net",
 			},
 		],
 	},

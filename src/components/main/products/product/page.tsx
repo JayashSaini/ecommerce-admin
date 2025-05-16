@@ -1,6 +1,6 @@
 "use client";
 
-import { getProductByIdAPI } from "@/api/ecommerce";
+import { deleteProductImageAPI, getProductByIdAPI } from "@/api/ecommerce";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +30,6 @@ import { ProductLayoutSkeleton } from "../components/skeleton/product.skeleton";
 
 import { ProductCharts } from "../components/product-chart";
 import { VariantTable } from "../components/variant-table";
-import FullscreenImage from "../../../common/fullscreen-image";
 import { CustomBreadcrumb } from "@/components/common/breadcrum";
 import {
 	DropdownMenu,
@@ -39,17 +38,24 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EditProductDialog } from "../components/dialog/edit/edit-project";
+import { DeleteProductDialog } from "../components/dialog/delete-product";
+import { EditProductAttributeDialog } from "../components/dialog/edit/edit-attributes";
+import ScrollContainer from "react-indiana-drag-scroll";
+import { ProductMedia } from "../components/product-media";
 
 export function Page() {
 	const { id } = useParams();
 	const router = useRouter();
 	const [product, setProduct] = useState<null | ProductInterface>(null);
 	const [openEditDialog, setOpenEditDialog] = useState(false);
+	const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+	const [openEditAttributeDialog, setOpenEditAttributeDialog] = useState(false);
+	const [productLoader, setProductLoader] = useState(false);
 
 	const fetchProduct = async () => {
 		await requestHandler(
 			() => getProductByIdAPI(id?.toString() || ""),
-			null,
+			setProductLoader,
 			({ data }) => {
 				setProduct(data);
 			},
@@ -61,11 +67,25 @@ export function Page() {
 	};
 	useEffect(() => {
 		fetchProduct();
-
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]);
 
-	return !product ? (
+	const deleteProductImage = async (productId: string, imageKey: string) => {
+		await requestHandler(
+			() => deleteProductImageAPI(productId, imageKey),
+			null,
+			async ({ data }) => {
+				setProduct(data);
+				await fetchProduct();
+				toast.success("Product image deleted successfully.");
+			},
+			(e) => {
+				toast.error(e);
+			}
+		);
+	};
+
+	return productLoader || !product ? (
 		<ProductLayoutSkeleton />
 	) : (
 		<>
@@ -117,7 +137,10 @@ export function Page() {
 											<IconEdit className="w-4 h-4 mr-2 text-muted-foreground" />
 											Edit
 										</DropdownMenuItem>
-										<DropdownMenuItem className="cursor-pointer">
+										<DropdownMenuItem
+											className="cursor-pointer"
+											onClick={() => setOpenDeleteDialog(true)}
+										>
 											<IconTrash className="w-4 h-4 mr-2 text-muted-foreground" />
 											Delete
 										</DropdownMenuItem>
@@ -155,52 +178,54 @@ export function Page() {
 					</CardContent>
 				</Card>
 				{/* Child 2 – 40% */}
-				<Card className="@container/card  col-span-5 md:col-span-2">
-					<CardHeader>
-						<CardTitle className="sm:text-md text-base">Media</CardTitle>
-						<CardAction>
-							<IconDots className="w-5 text-secondary-foreground cursor-pointer" />
-						</CardAction>
-					</CardHeader>
-					<Separator />
-					<CardContent className="w-full  flex overflow-auto gap-4 py-2">
-						{product?.images.map((image) => (
-							<FullscreenImage
-								alt="product images"
-								src={image.url}
-								key={image.key}
-								width={110}
-								height={110}
-								className="rounded-xl"
-							/>
-						))}
-					</CardContent>
-				</Card>
+				<ProductMedia
+					productId={product.id}
+					images={product.images}
+					deleteImages={(productId, imageKey) => {
+						deleteProductImage(productId, imageKey);
+					}}
+					fetchProduct={fetchProduct}
+				/>
 				{/* Child 3 – 40% */}
 				<Card className=" h-fit @container/card  col-span-5 md:col-span-2">
 					<CardHeader>
 						<CardTitle className="sm:text-md text-base">Attributes</CardTitle>
 						<CardAction>
-							<IconDots className="w-5 text-secondary-foreground cursor-pointer" />
+							<EditProductAttributeDialog
+								open={openEditAttributeDialog}
+								setOpen={setOpenEditAttributeDialog}
+								color={product?.color || ""}
+								size={product?.size || []}
+								material={product?.material || ""}
+								stockQty={Number(product?.stockQty) || 0}
+								fetchProductDetails={() => {
+									fetchProduct();
+								}}
+							/>
 						</CardAction>
 					</CardHeader>
 					<Separator />
-					<CardContent className="w-full   gap-4 grid grid-cols-5">
-						<h3 className="text-card-foreground text-sm col-span-2 ">Size</h3>
-						<CardDescription className="col-span-3">
-							{product?.size && product?.size?.length > 0 ? (
-								<div className="flex gap-2">
-									{product?.size.map((size, i) => (
-										<Button
-											variant="outline"
-											size="sm"
-											className="text-xs px"
-											key={i}
-										>
-											{size}
-										</Button>
-									))}
-								</div>
+					<CardContent className="w-full gap-4 grid grid-cols-5">
+						<h3 className="text-card-foreground text-sm col-span-2">Size</h3>
+						<CardDescription className="col-span-3 overflow-hidden">
+							{product?.size && product?.size.length > 0 ? (
+								<ScrollContainer
+									className="max-w-full overflow-x-auto flex gap-2 cursor-grab active:cursor-grabbing pb-1"
+									vertical={false}
+								>
+									<div className="flex gap-2 w-max">
+										{product.size.map((size, i) => (
+											<Button
+												variant="outline"
+												size="sm"
+												className="text-xs select-none"
+												key={i}
+											>
+												{size}
+											</Button>
+										))}
+									</div>
+								</ScrollContainer>
 							) : (
 								"-"
 							)}
@@ -247,6 +272,10 @@ export function Page() {
 			<EditProductDialog
 				open={openEditDialog}
 				setOpen={setOpenEditDialog}
+			/>
+			<DeleteProductDialog
+				open={openDeleteDialog}
+				setOpen={setOpenDeleteDialog}
 			/>
 		</>
 	);

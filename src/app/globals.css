@@ -252,3 +252,31 @@ body {
 .PopoverContent[data-align="end"] {
 	animation-name: slideDown;
 }
+
+/* styles/globals.css or in tailwind config */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none; /* IE & Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+/* in your global CSS or a module */
+.scrollbar-thin {
+	scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+	height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+	background-color: rgba(100, 100, 100, 0.3);
+	border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+	background: transparent;
+}

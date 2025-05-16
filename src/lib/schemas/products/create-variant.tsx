@@ -45,6 +45,59 @@ export const createProductVariantSchema = z.object({
 		.max(99999, { message: "Additional price is too high" }),
 });
 
+export const editProductVariantSchema = z.object({
+	material: z
+		.string()
+		.trim()
+		.transform((val) => (val === "" ? undefined : val))
+		.optional()
+		.refine((val) => val === undefined || val.length <= 50, {
+			message: "Material must be at most 50 characters",
+		}),
+
+	color: z
+		.string()
+		.trim()
+		.transform((val) => (val === "" ? undefined : val))
+		.optional()
+		.refine((val) => val === undefined || val.length <= 30, {
+			message: "Color must be at most 30 characters",
+		}),
+
+	title: z
+		.string()
+		.trim()
+		.transform((val) => (val === "" ? undefined : val))
+		.optional()
+		.refine((val) => val === undefined || val.length <= 100, {
+			message: "Title must be at most 100 characters",
+		}),
+
+	size: z
+		.string()
+		.trim()
+		.transform((val) => (val === "" ? undefined : val))
+		.optional(),
+
+	stockQty: z
+		.preprocess((val) => {
+			if (val === "" || val === null || typeof val === "undefined") {
+				return undefined;
+			}
+			return Number(val);
+		}, z.number().int().min(1, { message: "Stock quantity must be at least 1" }))
+		.optional(),
+
+	additionalPrice: z
+		.preprocess((val) => {
+			if (val === "" || val === null || typeof val === "undefined") {
+				return undefined;
+			}
+			return Number(val);
+		}, z.number().min(0, { message: "Additional price must be at least 0" }).max(99999, { message: "Additional price is too high" }))
+		.optional(),
+});
+
 export enum PRODUCT_SIZE_ENUM {
 	XS = "XS",
 	S = "S",

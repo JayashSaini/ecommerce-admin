@@ -74,7 +74,7 @@ import {
 } from "@/features/slices/dashboardSlice";
 import { ProductInterface } from "@/types/app";
 import Link from "next/link";
-import Image from "next/image";
+import { CDNImage } from "@/components/common/cdn-image";
 
 export function ProductTable() {
 	const {
@@ -334,9 +334,9 @@ const columns: ColumnDef<ProductInterface>[] = [
 		accessorKey: "images",
 		header: "Images",
 		cell: ({ row }) => (
-			<Image
+			<CDNImage
 				alt={"variants"}
-				src={row.original.images[0].url}
+				src={row.original.images[0].key}
 				height={30}
 				width={30}
 				className="rounded-sm"

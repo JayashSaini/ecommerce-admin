@@ -5,7 +5,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "../ui/mode-toggle";
 import { Notifications } from "../common/notification";
 
-// import { ThemeSelector } from "./theme-selector";
+import { ThemeSelector } from "./theme-selector";
 import { SearchBar } from "../common/search-bar";
 
 export function SiteHeader() {
@@ -25,7 +25,7 @@ export function SiteHeader() {
 				/>
 
 				<div className="ml-auto flex items-center gap-2">
-					{/* <ThemeSelector /> */}
+					<ThemeSelector />
 					<div className="sm:flex hidden">
 						<ModeToggle />
 					</div>

@@ -46,25 +46,41 @@ export const editProductSchema = z.object({
 	name: z
 		.string()
 		.trim()
-		.min(3, "Product name must be at least 3 characters long.")
-		.max(100, "Product name cannot exceed 100 characters.")
-		.nullable(), // This makes the field nullable, i.e., it can be null or a valid string.
+		.transform((val) => (val === "" ? undefined : val))
+		.optional()
+		.refine((val) => val === undefined || val.length >= 3, {
+			message: "Product name must be at least 3 characters long.",
+		})
+		.refine((val) => val === undefined || val.length <= 100, {
+			message: "Product name cannot exceed 100 characters.",
+		}),
 
 	description: z
 		.string()
 		.trim()
-		.min(3, "Description must be at least 3 characters long.")
-		.max(500, "Description cannot exceed 500 characters.")
-		.nullable(), // Nullable description
+		.transform((val) => (val === "" ? undefined : val))
+		.optional()
+		.refine((val) => val === undefined || val.length >= 3, {
+			message: "Description must be at least 3 characters long.",
+		})
+		.refine((val) => val === undefined || val.length <= 500, {
+			message: "Description cannot exceed 500 characters.",
+		}),
+	basePrice: z
+		.preprocess((val) => {
+			console.log("val is ; ", val);
+			if (val === "" || val === null || typeof val === "undefined") {
+				console.log("val is asdfasdfas");
+				return undefined;
+			}
 
-	basePrice: z.coerce
-		.number()
-		.nonnegative("Base price cannot be negative")
-		.min(99, "Base price must be minimum 99")
-		.max(999999, "Base price cannot exceed 999,999.")
-		.nullable(), // Nullable basePrice
+			return Number(val);
+		}, z.number().min(99, "Base price must be minimum 99.").max(999999, "Base price cannot exceed 999,999."))
+		.optional(),
 
-	categoryId: z.coerce.number().nullable(), // Nullable categoryId
+	categoryId: z
+		.preprocess((val) => (val === "" ? undefined : val), z.number())
+		.optional(),
 
 	images: z
 		.array(
@@ -73,5 +89,26 @@ export const editProductSchema = z.object({
 			})
 		)
 		.max(4, "Maximum of 4 images allowed")
-		.nullable(), // Nullable images array
+		.optional(),
+});
+
+export const createProductVariantSchema = z.object({
+	material: z
+		.string()
+		.trim()
+		.nonempty({ message: "Material is required" })
+		.max(50, { message: "Material must be at most 50 characters" }),
+
+	color: z
+		.string()
+		.trim()
+		.nonempty({ message: "Color is required" })
+		.max(30, { message: "Color must be at most 30 characters" }),
+
+	size: z.string().trim().nonempty({ message: "Size is required" }),
+
+	stockQty: z.coerce
+		.number({ invalid_type_error: "Stock quantity must be a number" })
+		.int()
+		.min(1, { message: "Stock quantity must be at least 1" }),
 });

@@ -28,7 +28,6 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { useAppSelector } from "@/store/hooks";
-import Image from "next/image";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import {
 	Command,
@@ -46,6 +45,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { createProductAPI } from "@/api/ecommerce";
+import Image from "next/image";
 
 type ProductFormData = z.infer<typeof createProductSchema>;
 

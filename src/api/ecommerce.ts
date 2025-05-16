@@ -1,6 +1,8 @@
 // Import necessary modules and utilities
 import axios from "axios";
 import { LocalStorage } from "@/lib/utils";
+import { ProductImage } from "@/types/app";
+import { ParamValue } from "next/dist/server/request/params";
 
 // Create an Axios instance for API requests
 const ecomClient = axios.create({
@@ -49,9 +51,59 @@ const createProductAPI = (formData: FormData) => {
 	});
 };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const updateProductAPI = (data: any) => {
-	return ecomClient.patch("/products", data);
+const updateProductAPI = (productId: string | 0, data: any) => {
+	return ecomClient.patch(`/products/${productId}`, data);
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const updateVariantAPI = (productId: ParamValue, data: any) => {
+	return ecomClient.patch(`/products/variants/${productId}`, data);
+};
+
+const uploadProductImageAPI = (id: number, formData: FormData) => {
+	return ecomClient.post(`/products/${id}/image`, formData, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	});
+};
+
+const updateProductImagesOrderAPI = (id: number, images: ProductImage[]) => {
+	return ecomClient.patch(`/products/${id}/image`, {
+		newImagesOrder: images,
+	});
+};
+
+const uploadVariantImageAPI = (id: number, formData: FormData) => {
+	return ecomClient.post(`/products/variants/${id}/image`, formData, {
+		headers: {
+			"Content-Type": "multipart/form-data",
+		},
+	});
+};
+
+const updateVariantImagesOrderAPI = (id: number, images: ProductImage[]) => {
+	return ecomClient.patch(`/products/variants/${id}/image`, {
+		newImagesOrder: images,
+	});
+};
+
+const deleteProductAPI = (productId: string | 0) => {
+	return ecomClient.delete(`/products/${productId}`);
+};
+
+const deleteVariantAPI = (productId: ParamValue) => {
+	return ecomClient.delete(`/products/variants/delete/${productId}`);
+};
+
+const deleteProductImageAPI = (productId: string, imageKey: string) => {
+	return ecomClient.delete(`/products/${productId}/${imageKey}`);
+};
+
+const deleteVariantImageAPI = (variantId: ParamValue, imageKey: string) => {
+	return ecomClient.delete(`/products/variants/${variantId}/${imageKey}`);
+};
+
 const createVariantAPI = (formData: FormData) => {
 	return ecomClient.post("/products/variants", formData, {
 		headers: {
@@ -69,4 +121,13 @@ export {
 	createVariantAPI,
 	getVariantByIdAPI,
 	updateProductAPI,
+	deleteProductAPI,
+	deleteVariantAPI,
+	deleteProductImageAPI,
+	uploadProductImageAPI,
+	deleteVariantImageAPI,
+	updateProductImagesOrderAPI,
+	uploadVariantImageAPI,
+	updateVariantImagesOrderAPI,
+	updateVariantAPI,
 };
