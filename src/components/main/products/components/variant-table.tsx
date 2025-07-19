@@ -152,7 +152,7 @@ export function VariantTable({
 							await reloadProduct();
 							setReloadLoading(false);
 						}}
-						disabled={reloadLoading}
+						disabled={reloadLoading || variants.length == 0}
 					>
 						{reloadLoading ? (
 							<IconReload className="h-[1.2rem] w-[1.2rem] transition-all animate-spin" />
@@ -163,6 +163,7 @@ export function VariantTable({
 					</Button>
 					<CreateVariantDialog productId={productId} />
 				</CardAction>
+				
 			</CardHeader>
 			<div className="overflow-hidden rounded-lg border">
 				<DndContext

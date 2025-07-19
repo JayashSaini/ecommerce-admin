@@ -43,6 +43,7 @@ import {
 	IconCircleCheckFilled,
 	IconGripVertical,
 	IconLoader,
+	IconReload,
 } from "@tabler/icons-react";
 
 import React from "react";
@@ -75,6 +76,10 @@ import {
 import { ProductInterface } from "@/types/app";
 import Link from "next/link";
 import { CDNImage } from "@/components/common/cdn-image";
+import { Filters } from "./filters";
+
+import { getProducts } from "@/features/thunk/dashboardThunk";
+import { SearchBar } from "./searchbar";
 
 export function ProductTable() {
 	const {
@@ -92,6 +97,9 @@ export function ProductTable() {
 		[]
 	);
 	const [sorting, setSorting] = React.useState<SortingState>([]);
+
+	const [globalFilterValue, setGlobalFilterValue] = React.useState("");
+	const [reloadLoading, setReloadLoading] = React.useState(false);
 
 	const sortableId = React.useId();
 	const sensors = useSensors(
@@ -151,8 +159,42 @@ export function ProductTable() {
 		}
 	}
 
+	const onProductsReloadHandler = async () => {
+		setReloadLoading(true);
+		await dispatch(getProducts());
+		setReloadLoading(false);
+	};
+
 	return (
-		<div className="relative flex flex-col gap-4 overflow-auto px-2 ">
+		<div className="relative flex flex-col gap-2 overflow-auto px-2 mt-2">
+			<div className="w-full flex justify-between  items-center ">
+				<Filters />
+				<div className="flex gap-2">
+					<SearchBar
+						value={globalFilterValue}
+						onChange={(e) => {
+							const value = e.target.value;
+							setGlobalFilterValue(value);
+							table.getColumn("name")?.setFilterValue(value); // filter by Name
+						}}
+						className="border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50"
+					/>
+
+					<Button
+						variant="outline"
+						size="icon"
+						onClick={onProductsReloadHandler}
+						disabled={reloadLoading}
+					>
+						{reloadLoading ? (
+							<IconReload className="h-[1.2rem] w-[1.2rem] transition-all animate-spin" />
+						) : (
+							<IconReload className="h-[1.2rem] w-[1.2rem] transition-all " />
+						)}
+						<span className="sr-only">Reload products</span>
+					</Button>
+				</div>
+			</div>
 			<div className="overflow-hidden rounded-lg border">
 				<DndContext
 					collisionDetection={closestCenter}
@@ -344,7 +386,7 @@ const columns: ColumnDef<ProductInterface>[] = [
 		),
 	},
 	{
-		accessorKey: "Name",
+		accessorKey: "name",
 		header: "Name",
 		cell: ({ row }) => {
 			return (
@@ -358,7 +400,6 @@ const columns: ColumnDef<ProductInterface>[] = [
 				</Button>
 			);
 		},
-		enableHiding: false,
 	},
 	{
 		accessorKey: "description",
@@ -370,7 +411,6 @@ const columns: ColumnDef<ProductInterface>[] = [
 				</p>
 			);
 		},
-		enableHiding: false,
 	},
 	{
 		accessorKey: "status",

@@ -25,7 +25,9 @@ export function SiteHeader() {
 				/>
 
 				<div className="ml-auto flex items-center gap-2">
-					<ThemeSelector />
+					<div className="sm:flex hidden">
+						<ThemeSelector />
+					</div>
 					<div className="sm:flex hidden">
 						<ModeToggle />
 					</div>
